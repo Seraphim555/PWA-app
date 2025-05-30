@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PWA с QR-сканером</title>
+    <title>Онлайн Журнал</title>
     
     <!-- PWA мета-теги -->
     <link rel="manifest" href="manifest.json">
@@ -102,12 +102,12 @@
 </head>
 <body>
     <header>
-        <h1>PWA с QR-сканером</h1>
+        <h1>Онлайн Журнал</h1>
     </header>
     
     <main>
         <div class="section">
-            <h2>Идентификация пользователя</h2>
+            <h2>Идентификация преподавателя</h2>
             <div>
                 <label for="username">Ваше имя:</label>
                 <input type="text" id="username" placeholder="Введите ваше имя" required>
@@ -117,7 +117,7 @@
         </div>
 
         <div class="section">
-            <h2>Сканер QR-кодов</h2>
+            <h2>Сканер QR-кода аудитории</h2>
             <div id="scanner-container">
                 <video id="qr-video" playsinline></video>
             </div>
@@ -135,14 +135,14 @@
         </div>
 
         <div class="section">
-            <h2>История сканирований</h2>
+            <h2>История журнала</h2>
             <button id="clear-history">Очистить историю</button>
             <div id="scan-history"></div>
         </div>
     </main>
     
     <footer>
-        <p>© 2025 PWA с QR-сканером</p>
+        <p>© 2025 Онлайн Журнал УРФУ</p>
     </footer>
 
     <!-- Подключаем библиотеку для сканирования QR-кодов -->
@@ -172,7 +172,7 @@
         // Загрузка сохраненного имени
         if (currentUsername) {
             usernameInput.value = currentUsername;
-            usernameStatus.textContent = `Текущий пользователь: ${currentUsername}`;
+            usernameStatus.textContent = `Текущий преподаватель: ${currentUsername}`;
             usernameStatus.style.color = 'green';
             startBtn.disabled = false;
         } else {
@@ -185,7 +185,7 @@
             if (name) {
                 currentUsername = name;
                 localStorage.setItem('username', name);
-                usernameStatus.textContent = `Текущий пользователь: ${name}`;
+                usernameStatus.textContent = `Текущий преподаватель: ${name}`;
                 usernameStatus.style.color = 'green';
                 startBtn.disabled = false;
             } else {
@@ -317,9 +317,9 @@
             const historyContainer = document.getElementById('scan-history');
             historyContainer.innerHTML = scanHistory.map(record => `
                 <div class="history-item">
-                    <p><strong>Пользователь:</strong> ${record.username || 'Не указан'}</p>
+                    <p><strong>Преподаватель:</strong> ${record.username || 'Не указан'}</p>
                     <p><strong>Время:</strong> ${new Date(record.timestamp).toLocaleString()}</p>
-                    <p><strong>Комната:</strong> ${record.qrData}</p>
+                    <p><strong>Аудитория:</strong> ${record.qrData}</p>
                     <hr>
                 </div>
             `).join('');
