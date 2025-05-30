@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой первый сайт</title>
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+
+    <!-- Для iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <!-- Для Windows -->
+    <meta name="msapplication-TileImage" content="icon-144.png">
+    <meta name="msapplication-TileColor" content="#4CAF50">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #counter {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Добро пожаловать на мой сайт!</h1>
+    </header>
+    
+    <main>
+        <section>
+            <h2>Обо мне</h2>
+            <p>Это мой первый сайт, созданный с помощью HTML, CSS и JavaScript.</p>
+        </section>
+        
+        <section>
+            <h2>Интерактивный элемент</h2>
+            <div id="counter">0</div>
+            <button onclick="incrementCounter()">Увеличить счетчик</button>
+            <button onclick="resetCounter()">Сбросить</button>
+        </section>
+    </main>
+    
+    <footer>
+        <p>© 2025 Мой первый сайт</p>
+    </footer>
+
+    <script>
+        let count = 0;
+        const counterElement = document.getElementById('counter');
+        
+        function incrementCounter() {
+            count++;
+            counterElement.textContent = count;
+        }
+        
+        function resetCounter() {
+            count = 0;
+            counterElement.textContent = count;
+        }
+        
+        // Приветствие при загрузке страницы
+        window.onload = function() {
+            alert('Добро пожаловать на мой сайт!');
+        };
+    </script>
+
+    <script>
+    // Регистрация Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+            console.log('ServiceWorker registration successful');
+            })
+            .catch(err => {
+            console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+    }
+    </script>
+
+</body>
+</html>
