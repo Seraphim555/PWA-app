@@ -91,7 +91,7 @@
     </main>
     
     <footer>
-        <p>© 2023 PWA с QR-сканером</p>
+        <p>© 2025 PWA с QR-сканером</p>
     </footer>
 
     <!-- Подключаем библиотеку для сканирования QR-кодов -->
@@ -146,24 +146,28 @@
         function scanQRCode() {
             if (!scanning) return;
             
+            // Проверяем, готово ли видео
+            if (videoElement.readyState === 0 || videoElement.videoWidth === 0) {
+                requestAnimationFrame(scanQRCode);
+                return;
+            }
+            
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
             canvas.width = videoElement.videoWidth;
             canvas.height = videoElement.videoHeight;
             
-            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imageData.data, imageData.width, imageData.height);
-            
-            if (code) {
-                resultElement.textContent = code.data;
-                shareBtn.disabled = false;
+            try {
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
                 
-                // Можно добавить визуальное подтверждение сканирования
-                resultElement.style.border = "2px solid #4CAF50";
-                setTimeout(() => {
-                    resultElement.style.border = "1px solid #ddd";
-                }, 500);
+                if (code) {
+                    resultElement.textContent = code.data;
+                    shareBtn.disabled = false;
+                }
+            } catch (err) {
+                console.error("Ошибка обработки кадра:", err);
             }
             
             requestAnimationFrame(scanQRCode);
