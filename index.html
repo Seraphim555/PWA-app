@@ -83,6 +83,21 @@
             border-radius: 5px;
             padding: 10px;
         }
+
+        #username {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #save-username {
+            background-color: #2196F3;
+        }
+
+        .history-item p {
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
@@ -91,6 +106,16 @@
     </header>
     
     <main>
+        <div class="section">
+            <h2>Идентификация пользователя</h2>
+            <div>
+                <label for="username">Ваше имя:</label>
+                <input type="text" id="username" placeholder="Введите ваше имя" required>
+                <button id="save-username">Сохранить</button>
+            </div>
+            <p id="username-status" style="color: red;">Имя не введено</p>
+        </div>
+
         <div class="section">
             <h2>Сканер QR-кодов</h2>
             <div id="scanner-container">
@@ -130,6 +155,10 @@
         const stopBtn = document.getElementById('stop-scanner');
         const resultElement = document.getElementById('qr-result');
         const shareBtn = document.getElementById('share-btn');
+        let currentUsername = localStorage.getItem('username') || '';
+        const usernameInput = document.getElementById('username');
+        const saveUsernameBtn = document.getElementById('save-username');
+        const usernameStatus = document.getElementById('username-status');
         
         // Переменные для работы сканера
         let stream = null;
@@ -137,6 +166,32 @@
 
         // Конфигурация
         const ALLOWED_QR_CODES = ["Аудитория номер 1", "Аудитория номер 2", "Аудитория номер 3"];
+
+        // Загрузка сохраненного имени
+        if (currentUsername) {
+            usernameInput.value = currentUsername;
+            usernameStatus.textContent = `Текущий пользователь: ${currentUsername}`;
+            usernameStatus.style.color = 'green';
+            startBtn.disabled = false;
+        } else {
+            startBtn.disabled = true;
+        }
+
+        // Сохранение имени
+        saveUsernameBtn.addEventListener('click', () => {
+            const name = usernameInput.value.trim();
+            if (name) {
+                currentUsername = name;
+                localStorage.setItem('username', name);
+                usernameStatus.textContent = `Текущий пользователь: ${name}`;
+                usernameStatus.style.color = 'green';
+                startBtn.disabled = false;
+            } else {
+                usernameStatus.textContent = 'Пожалуйста, введите ваше имя';
+                usernameStatus.style.color = 'red';
+                startBtn.disabled = true;
+            }
+        });
         
         // Запуск сканера
         startBtn.addEventListener('click', async () => {
@@ -223,6 +278,7 @@
             const scanRecord = {
                 timestamp: new Date().toISOString(),
                 deviceName: navigator.userAgentData?.brands?.map(b => b.brand).join(' ') || navigator.userAgent,
+                username: currentUsername,  // Добавляем имя пользователя
                 qrData: qrData
             };
             
@@ -246,8 +302,9 @@
             const historyContainer = document.getElementById('scan-history');
             historyContainer.innerHTML = scanHistory.map(record => `
                 <div class="history-item">
+                    <p><strong>Пользователь:</strong> ${record.username || 'Не указан'}</p>
                     <p><strong>Время:</strong> ${new Date(record.timestamp).toLocaleString()}</p>
-                    <p><strong>Устройство:</strong> ${record.deviceName.substring(0, 100)}...</p>
+                    <p><strong>Устройство:</strong> ${record.deviceName.substring(0, 50)}...</p>
                     <p><strong>QR-код:</strong> ${record.qrData}</p>
                     <hr>
                 </div>
