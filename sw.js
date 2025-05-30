@@ -3,7 +3,8 @@ const urlsToCache = [
     '/',
     '/index.html',
     '/styles.css',
-    '/script.js'
+    '/script.js',
+    'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'
 ];
 
 self.addEventListener('install', event => {

@@ -6,6 +6,7 @@
   "background_color": "#4CAF50",
   "theme_color": "#4CAF50",
   "description": "Простое PWA приложение",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "windows11/SmallTile.scale-100.png",
