@@ -127,6 +127,12 @@
             <h3>Результат сканирования:</h3>
             <div id="qr-result">Здесь появится результат...</div>
         </div>
+        
+        <div class="section">
+            <h2>Дополнительные функции</h2>
+            <button id="installBtn" style="display:none;">Установить приложение</button>
+            <button id="share-btn" disabled>Поделиться результатом</button>
+        </div>
 
         <div class="section">
             <h2>История сканирований</h2>
@@ -313,8 +319,7 @@
                 <div class="history-item">
                     <p><strong>Пользователь:</strong> ${record.username || 'Не указан'}</p>
                     <p><strong>Время:</strong> ${new Date(record.timestamp).toLocaleString()}</p>
-                    <p><strong>Устройство:</strong> ${record.deviceName.substring(0, 50)}...</p>
-                    <p><strong>QR-код:</strong> ${record.qrData}</p>
+                    <p><strong>Комната:</strong> ${record.qrData}</p>
                     <hr>
                 </div>
             `).join('');
