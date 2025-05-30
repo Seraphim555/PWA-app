@@ -134,6 +134,9 @@
         // Переменные для работы сканера
         let stream = null;
         let scanning = false;
+
+        // Конфигурация
+        const ALLOWED_QR_CODES = ["Аудитория номер 1", "Аудитория номер 2", "Аудитория номер 3"];
         
         // Запуск сканера
         startBtn.addEventListener('click', async () => {
@@ -221,17 +224,38 @@
         // Хранилище для истории сканирований
         let scanHistory = JSON.parse(localStorage.getItem('scanHistory')) || [];
 
-        // Функция для сохранения данных сканирования
+        // Модифицированная функция сохранения данных
         function saveScanData(qrData) {
+            if (!isValidQrCode(qrData)) {
+                // Визуальное обозначение невалидного кода
+                resultElement.style.border = "2px solid #f44336";
+                resultElement.style.backgroundColor = "#ffebee";
+                setTimeout(() => {
+                    resultElement.style.border = "1px solid #ddd";
+                    resultElement.style.backgroundColor = "";
+                }, 1000);
+                return false; // Не сохраняем в историю
+            }
+            
             const scanRecord = {
                 timestamp: new Date().toISOString(),
                 deviceName: navigator.userAgentData?.brands?.map(b => b.brand).join(' ') || navigator.userAgent,
                 qrData: qrData
             };
             
-            scanHistory.unshift(scanRecord); // Добавляем в начало массива
+            scanHistory.unshift(scanRecord);
             localStorage.setItem('scanHistory', JSON.stringify(scanHistory));
             updateHistoryDisplay();
+            
+            // Визуальное обозначение валидного кода
+            resultElement.style.border = "2px solid #4CAF50";
+            resultElement.style.backgroundColor = "#e8f5e9";
+            setTimeout(() => {
+                resultElement.style.border = "1px solid #ddd";
+                resultElement.style.backgroundColor = "";
+            }, 1000);
+            
+            return true;
         }
 
         // Функция для отображения истории
@@ -254,7 +278,12 @@
             updateHistoryDisplay();
         });
 
-        // Модифицируем функцию scanQRCode
+        // Функция проверки QR-кода
+        function isValidQrCode(qrData) {
+            return ALLOWED_QR_CODES.includes(qrData);
+        }
+
+        // Обновленная функция scanQRCode
         function scanQRCode() {
             if (!scanning) return;
             
@@ -277,14 +306,8 @@
                     resultElement.textContent = code.data;
                     shareBtn.disabled = false;
                     
-                    // Сохраняем данные сканирования
+                    // Сохраняем только валидные QR-коды
                     saveScanData(code.data);
-                    
-                    // Визуальное подтверждение
-                    resultElement.style.border = "2px solid #4CAF50";
-                    setTimeout(() => {
-                        resultElement.style.border = "1px solid #ddd";
-                    }, 500);
                 }
             } catch (err) {
                 console.error("Ошибка обработки кадра:", err);
