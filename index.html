@@ -171,23 +171,6 @@
             scanning = false;
         });
         
-        // Поделиться результатом
-        shareBtn.addEventListener('click', async () => {
-            try {
-                if (navigator.share) {
-                    await navigator.share({
-                        title: 'Результат сканирования QR-кода',
-                        text: resultElement.textContent,
-                    });
-                } else {
-                    // Fallback для браузеров без Web Share API
-                    alert(`Результат: ${resultElement.textContent}`);
-                }
-            } catch (err) {
-                console.log('Ошибка при попытке поделиться:', err);
-            }
-        });
-        
         // Установка PWA
         let deferredPrompt;
         const installBtn = document.getElementById('installBtn');
