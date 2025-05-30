@@ -63,6 +63,26 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
+        .history-item {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #clear-history {
+            background-color: #f44336;
+            margin-bottom: 15px;
+        }
+
+        #scan-history {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -87,6 +107,12 @@
             <h2>Дополнительные функции</h2>
             <button id="installBtn" style="display:none;">Установить приложение</button>
             <button id="share-btn" disabled>Поделиться результатом</button>
+        </div>
+
+        <div class="section">
+            <h2>История сканирований</h2>
+            <button id="clear-history">Очистить историю</button>
+            <div id="scan-history"></div>
         </div>
     </main>
     
@@ -142,37 +168,6 @@
             scanning = false;
         });
         
-        // Функция сканирования QR-кода
-        function scanQRCode() {
-            if (!scanning) return;
-            
-            // Проверяем, готово ли видео
-            if (videoElement.readyState === 0 || videoElement.videoWidth === 0) {
-                requestAnimationFrame(scanQRCode);
-                return;
-            }
-            
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
-            
-            try {
-                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                const code = jsQR(imageData.data, imageData.width, imageData.height);
-                
-                if (code) {
-                    resultElement.textContent = code.data;
-                    shareBtn.disabled = false;
-                }
-            } catch (err) {
-                console.error("Ошибка обработки кадра:", err);
-            }
-            
-            requestAnimationFrame(scanQRCode);
-        }
-        
         // Поделиться результатом
         shareBtn.addEventListener('click', async () => {
             try {
@@ -222,6 +217,84 @@
                     });
             });
         }
+
+        // Хранилище для истории сканирований
+        let scanHistory = JSON.parse(localStorage.getItem('scanHistory')) || [];
+
+        // Функция для сохранения данных сканирования
+        function saveScanData(qrData) {
+            const scanRecord = {
+                timestamp: new Date().toISOString(),
+                deviceName: navigator.userAgentData?.brands?.map(b => b.brand).join(' ') || navigator.userAgent,
+                qrData: qrData
+            };
+            
+            scanHistory.unshift(scanRecord); // Добавляем в начало массива
+            localStorage.setItem('scanHistory', JSON.stringify(scanHistory));
+            updateHistoryDisplay();
+        }
+
+        // Функция для отображения истории
+        function updateHistoryDisplay() {
+            const historyContainer = document.getElementById('scan-history');
+            historyContainer.innerHTML = scanHistory.map(record => `
+                <div class="history-item">
+                    <p><strong>Время:</strong> ${new Date(record.timestamp).toLocaleString()}</p>
+                    <p><strong>Устройство:</strong> ${record.deviceName.substring(0, 100)}...</p>
+                    <p><strong>QR-код:</strong> ${record.qrData}</p>
+                    <hr>
+                </div>
+            `).join('');
+        }
+
+        // Очистка истории
+        document.getElementById('clear-history').addEventListener('click', () => {
+            scanHistory = [];
+            localStorage.removeItem('scanHistory');
+            updateHistoryDisplay();
+        });
+
+        // Модифицируем функцию scanQRCode
+        function scanQRCode() {
+            if (!scanning) return;
+            
+            if (videoElement.readyState === 0 || videoElement.videoWidth === 0) {
+                requestAnimationFrame(scanQRCode);
+                return;
+            }
+            
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            
+            try {
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                
+                if (code) {
+                    resultElement.textContent = code.data;
+                    shareBtn.disabled = false;
+                    
+                    // Сохраняем данные сканирования
+                    saveScanData(code.data);
+                    
+                    // Визуальное подтверждение
+                    resultElement.style.border = "2px solid #4CAF50";
+                    setTimeout(() => {
+                        resultElement.style.border = "1px solid #ddd";
+                    }, 500);
+                }
+            } catch (err) {
+                console.error("Ошибка обработки кадра:", err);
+            }
+            
+            requestAnimationFrame(scanQRCode);
+        }
+
+        // Инициализация истории при загрузке
+        window.addEventListener('DOMContentLoaded', updateHistoryDisplay);
     </script>
 </body>
 </html>
