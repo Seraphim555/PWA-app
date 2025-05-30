@@ -127,12 +127,6 @@
             <h3>Результат сканирования:</h3>
             <div id="qr-result">Здесь появится результат...</div>
         </div>
-        
-        <div class="section">
-            <h2>Дополнительные функции</h2>
-            <button id="installBtn" style="display:none;">Установить приложение</button>
-            <button id="share-btn" disabled>Поделиться результатом</button>
-        </div>
 
         <div class="section">
             <h2>История сканирований</h2>
@@ -166,6 +160,8 @@
 
         // Конфигурация
         const ALLOWED_QR_CODES = ["Аудитория номер 1", "Аудитория номер 2", "Аудитория номер 3"];
+        const SCAN_COOLDOWN = 5000; // 5 секунд в миллисекундах
+        let lastScanTimestamps = JSON.parse(localStorage.getItem('lastScanTimestamps')) || {};
 
         // Загрузка сохраненного имени
         if (currentUsername) {
@@ -262,23 +258,36 @@
         // Хранилище для истории сканирований
         let scanHistory = JSON.parse(localStorage.getItem('scanHistory')) || [];
 
-        // Модифицированная функция сохранения данных
+        // Модифицируем функцию saveScanData
         function saveScanData(qrData) {
             if (!isValidQrCode(qrData)) {
-                // Визуальное обозначение невалидного кода
                 resultElement.style.border = "2px solid #f44336";
                 resultElement.style.backgroundColor = "#ffebee";
                 setTimeout(() => {
                     resultElement.style.border = "1px solid #ddd";
                     resultElement.style.backgroundColor = "";
                 }, 1000);
-                return false; // Не сохраняем в историю
+                return false;
             }
             
+            // Проверяем временную метку последнего сканирования
+            const lastScanTime = lastScanTimestamps[currentUsername] || 0;
+            const currentTime = Date.now();
+            
+            if (currentTime - lastScanTime < SCAN_COOLDOWN) {
+                // Не показываем время ожидания, просто игнорируем сканирование
+                return false;
+            }
+            
+            // Обновляем временную метку
+            lastScanTimestamps[currentUsername] = currentTime;
+            localStorage.setItem('lastScanTimestamps', JSON.stringify(lastScanTimestamps));
+            
+            // Сохраняем результат сканирования
             const scanRecord = {
                 timestamp: new Date().toISOString(),
                 deviceName: navigator.userAgentData?.brands?.map(b => b.brand).join(' ') || navigator.userAgent,
-                username: currentUsername,  // Добавляем имя пользователя
+                username: currentUsername,
                 qrData: qrData
             };
             
@@ -297,7 +306,7 @@
             return true;
         }
 
-        // Функция для отображения истории
+        //Функция для отображения истории
         function updateHistoryDisplay() {
             const historyContainer = document.getElementById('scan-history');
             historyContainer.innerHTML = scanHistory.map(record => `
@@ -323,7 +332,7 @@
             return ALLOWED_QR_CODES.includes(qrData);
         }
 
-        // Обновленная функция scanQRCode
+        // Обновляем функцию scanQRCode для сохранения результата в любом случае
         function scanQRCode() {
             if (!scanning) return;
             
@@ -343,10 +352,11 @@
                 const code = jsQR(imageData.data, imageData.width, imageData.height);
                 
                 if (code) {
+                    // Всегда показываем результат сканирования
                     resultElement.textContent = code.data;
                     shareBtn.disabled = false;
                     
-                    // Сохраняем только валидные QR-коды
+                    // Пытаемся сохранить (но не сохраняем если не прошла минута)
                     saveScanData(code.data);
                 }
             } catch (err) {
