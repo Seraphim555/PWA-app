@@ -1,11 +1,11 @@
 {
-  "name": "Мое первое PWA",
-  "short_name": "МоеPWA",
+  "name": "Онлайн Журнал",
+  "short_name": "Журнал",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#4CAF50",
   "theme_color": "#4CAF50",
-  "description": "Простое PWA приложение",
+  "description": "Онлайн журнал УРФУ для ключей",
   "orientation": "portrait",
   "icons": [
     {

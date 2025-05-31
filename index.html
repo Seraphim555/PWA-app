@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Онлайн Журнал</title>
     
-    <!-- PWA мета-теги -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4CAF50">
     
@@ -128,8 +127,10 @@
             <div id="qr-result">Здесь появится результат...</div>
         </div>
         
-        <div class="section" style="display:none;">
-            <button id="installBtn" style="display:none;"></button>
+        <div class="section">
+            <h2>Дополнительные функции</h2>
+            <button id="installBtn" style="display:none;">Установить приложение</button>
+            <button id="share-btn" disabled>Поделиться результатом</button>
         </div>
 
         <div class="section">
@@ -143,7 +144,6 @@
         <p>© 2025 Онлайн Журнал УРФУ</p>
     </footer>
 
-    <!-- Подключаем библиотеку для сканирования QR-кодов -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     
     <script>
@@ -262,7 +262,7 @@
         // Хранилище для истории сканирований
         let scanHistory = JSON.parse(localStorage.getItem('scanHistory')) || [];
 
-        // Модифицируем функцию saveScanData
+        // Модифицированная функцию saveScanData
         function saveScanData(qrData) {
             if (!isValidQrCode(qrData)) {
                 resultElement.style.border = "2px solid #f44336";
@@ -274,20 +274,16 @@
                 return false;
             }
             
-            // Проверяем временную метку последнего сканирования
             const lastScanTime = lastScanTimestamps[currentUsername] || 0;
             const currentTime = Date.now();
             
             if (currentTime - lastScanTime < SCAN_COOLDOWN) {
-                // Не показываем время ожидания, просто игнорируем сканирование
                 return false;
             }
             
-            // Обновляем временную метку
             lastScanTimestamps[currentUsername] = currentTime;
             localStorage.setItem('lastScanTimestamps', JSON.stringify(lastScanTimestamps));
             
-            // Сохраняем результат сканирования
             const scanRecord = {
                 timestamp: new Date().toISOString(),
                 deviceName: navigator.userAgentData?.brands?.map(b => b.brand).join(' ') || navigator.userAgent,
@@ -299,7 +295,6 @@
             localStorage.setItem('scanHistory', JSON.stringify(scanHistory));
             updateHistoryDisplay();
             
-            // Визуальное обозначение валидного кода
             resultElement.style.border = "2px solid #4CAF50";
             resultElement.style.backgroundColor = "#e8f5e9";
             setTimeout(() => {
@@ -335,7 +330,7 @@
             return ALLOWED_QR_CODES.includes(qrData);
         }
 
-        // Обновляем функцию scanQRCode для сохранения результата в любом случае
+        // Обновленная функция scanQRCode
         function scanQRCode() {
             if (!scanning) return;
             
@@ -355,11 +350,9 @@
                 const code = jsQR(imageData.data, imageData.width, imageData.height);
                 
                 if (code) {
-                    // Всегда показываем результат сканирования
                     resultElement.textContent = code.data;
                     shareBtn.disabled = false;
                     
-                    // Пытаемся сохранить (но не сохраняем если не прошла минута)
                     saveScanData(code.data);
                 }
             } catch (err) {
